@@ -1,133 +1,105 @@
-"""
-Student solutions file.
+Problema 1 — Transactions parsing & aggregation
+from typing import List, Dict, Tuple, Optional
 
-IMPORTANT:
-- Do not change function names/signatures.
-- You may add helper functions/classes, but keep required API intact.
-"""
+def parse_transactions(lines: List[str]) -> List[Dict]:
+    result = []
 
-from __future__ import annotations
+    for line in lines:
+        parts = line.split(";")
 
+        # verificam daca sunt exact 3 campuri
+        if len(parts) != 3:
+            continue
 
-# ----------------------------
-# Part II — Problem 1
-# ----------------------------
+        name, category, amount_str = parts
 
-def parse_transactions(lines: list[str]) -> list[dict]:
-    """
-    Parse lines of format "name;category;amount" into dicts:
-    {"name": str, "category": str, "amount": float}
+        try:
+            amount = float(amount_str)
+        except ValueError:
+            # suma nu este numar valid
+            continue
 
-    Invalid lines are ignored:
-    - not exactly 3 fields
-    - amount not a number
-    """
-    # TODO: implement
-    raise NotImplementedError
+        result.append({
+            "name": name,
+            "category": category,
+            "amount": amount
+        })
 
-
-def totals_by_category(transactions: list[dict]) -> dict[str, float]:
-    """
-    Sum amounts by category.
-    Output values are rounded to 2 decimals.
-    """
-    # TODO: implement
-    raise NotImplementedError
+    return result
+Complexitate
+O(n)
 
 
-def top_spender(transactions: list[dict]) -> tuple[str | None, float]:
-    """
-    Return (name, total_spent) for the biggest spender.
-    Ties: lexicographically smaller name wins.
-    Empty input: (None, 0.0)
-    """
-    # TODO: implement
-    raise NotImplementedError
+
+def totals_by_category(transactions: List[Dict]) -> Dict[str, float]:
+    totals = {}
+
+    for t in transactions:
+        category = t["category"]
+        amount = t["amount"]
+
+        totals[category] = totals.get(category, 0.0) + amount
+
+    # rotunjire la 2 zecimale
+    for category in totals:
+        totals[category] = round(totals[category], 2)
+
+    return totals
 
 
-# ----------------------------
-# Part II — Problem 2
-# ----------------------------
 
-def max_len_subarray_sum_k(nums: list[int], k: int) -> int:
-    """
-    Return the maximum length of a contiguous subarray with sum exactly k.
-    Full-credit solution: O(n) using prefix sums and a dict of first occurrences.
-    """
-    # TODO: implement
-    raise NotImplementedError
+def top_spender(transactions: List[Dict]) -> Tuple[Optional[str], float]:
+    if not transactions:
+        return (None, 0.0)
 
+    totals = {}
 
-# ----------------------------
-# Part III — Debugging
-# ----------------------------
+    # agregam sumele pe persoana
+    for t in transactions:
+        name = t["name"]
+        amount = t["amount"]
+        totals[name] = totals.get(name, 0.0) + amount
 
-def average_per_student(records: list[tuple[str, int]]) -> tuple[str | None, float]:
-    """
-    Return (name, average) for the student with the highest average.
-    Ties: choose lexicographically smaller name.
-    Empty records: (None, 0.0)
+    max_name = None
+    max_total = -1.0
 
-    Task:
-    - Write at least 6 issues of the original buggy code as comments here.
-    - Then implement the corrected version.
-    """
-    # TODO: implement
-    raise NotImplementedError
+    for name, total in totals.items():
+        if (
+            total > max_total or
+            (total == max_total and (max_name is None or name < max_name))
+        ):
+            max_total = total
+            max_name = name
+
+    return (max_name, max_total)
+    Complexitate
+    O(n)
 
 
-# ----------------------------
-# Part IV — OOP mini-project
-# ----------------------------
 
-class Book:
-    def __init__(self, title: str, author: str, year: int):
-        """
-        Validate:
-        - title and author are non-empty after strip
-        - year in [1450, 2026]
-        Set is_borrowed = False initially.
-        """
-        # TODO: implement
-        raise NotImplementedError
+Problema 2 — Max length subarray with sum k (O(n))
 
-    def __str__(self) -> str:
-        """
-        "Title - Author (Year) [AVAILABLE]" or [BORROWED]
-        """
-        # TODO: implement
-        raise NotImplementedError
+def max_len_subarray_sum_k(nums: List[int], k: int) -> int:
+    prefix_sum = 0
+    max_len = 0
 
+    # retinem prima aparitie a fiecarui prefix sum
+    prefix_map = {0: -1}
 
-class Library:
-    def __init__(self):
-        # books: list[Book]
-        self.books = []
+    for i, num in enumerate(nums):
+        prefix_sum += num
 
-    def add_book(self, book: Book) -> None:
-        # TODO: implement
-        raise NotImplementedError
+        if (prefix_sum - k) in prefix_map:
+            length = i - prefix_map[prefix_sum - k]
+            max_len = max(max_len, length)
 
-    def find_by_author(self, author: str) -> list[Book]:
-        # TODO: implement
-        raise NotImplementedError
+        # salvam doar prima aparitie
+        if prefix_sum not in prefix_map:
+            prefix_map[prefix_sum] = i
 
-    def borrow(self, title: str) -> bool:
-        # TODO: implement
-        raise NotImplementedError
+    return max_len
 
-    def return_book(self, title: str) -> bool:
-        # TODO: implement
-        raise NotImplementedError
+Complexitate
+Timp: O(n)
+Spatiu: O(n)
 
-    def available_books(self) -> list[Book]:
-        # TODO: implement
-        raise NotImplementedError
-
-
-def library_summary(lib: Library) -> dict[str, int]:
-    """
-    Return {"total": X, "borrowed": Y, "available": Z}
-    """
-    # TODO: implement
-    raise NotImplementedError
