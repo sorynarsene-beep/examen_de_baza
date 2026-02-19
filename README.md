@@ -1,4 +1,4 @@
-# Python Exam (3 hours)
+# Python Exam (5 hours)
 
 This repository contains a ready-to-run exam package:
 - **Exam statement**: `exam/EXAM.md`
